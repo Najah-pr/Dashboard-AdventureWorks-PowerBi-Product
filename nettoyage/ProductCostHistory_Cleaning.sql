@@ -1,3 +1,7 @@
+-- =============================================
+-- Description: Script de nettoyage des données pour la table Production.ProductCostHistory
+-- =============================================
+
 IF OBJECT_ID('Production.ProductCostHistory_Clean', 'U') IS NOT NULL
     DROP TABLE Production.ProductCostHistory_Clean;
 

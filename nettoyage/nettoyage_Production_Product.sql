@@ -1,3 +1,7 @@
+-- =============================================
+-- Description: Script de nettoyage des données pour la table Production.Product
+-- =============================================
+
 -- 1. Supprimer les doublons potentiels
 WITH DuplicateCheck AS (
     SELECT 
@@ -18,42 +22,21 @@ DELETE FROM DuplicateCheck WHERE RowNum > 1;
 UPDATE Production.Product
 SET 
     Name = TRIM(Name),
-    SafetyStockLevel = CASE 
-        WHEN SafetyStockLevel < 0 THEN 0
-        ELSE SafetyStockLevel
-    END,
-    ReorderPoint = CASE 
-        WHEN ReorderPoint < 0 THEN 0
-        ELSE ReorderPoint
-    END,
-    StandardCost = CASE 
-        WHEN StandardCost < 0 THEN 0
-        ELSE StandardCost
-    END,
-    ListPrice = CASE 
-        WHEN ListPrice < 0 THEN 0
-        ELSE ListPrice
-    END,
-    DaysToManufacture = CASE 
-        WHEN DaysToManufacture < 0 THEN 0
-        ELSE DaysToManufacture
-    END,
-    ProductLine = UPPER(TRIM(ProductLine))
-WHERE ProductID IN (
-    SELECT ProductID 
-    FROM Production.Product 
-    WHERE Name IS NOT NULL
-);
+    SafetyStockLevel = COALESCE(NULLIF(SafetyStockLevel, 0), 0),
+    ReorderPoint = COALESCE(NULLIF(ReorderPoint, 0), 0),
+    StandardCost = COALESCE(NULLIF(StandardCost, 0), 0),
+    ListPrice = COALESCE(NULLIF(ListPrice, 0), 0),
+    DaysToManufacture = COALESCE(NULLIF(DaysToManufacture, 0), 0),
+    ProductLine = UPPER(TRIM(COALESCE(ProductLine, 'Other')))
+WHERE ProductID IS NOT NULL;
 
 -- 3. Vérifier la cohérence des prix
 UPDATE Production.Product
-SET ListPrice = StandardCost * 1.1
-WHERE ListPrice < StandardCost 
-AND ProductID IN (
-    SELECT ProductID 
-    FROM Production.Product 
-    WHERE StandardCost > 0
-);
+SET ListPrice = CASE 
+                    WHEN ListPrice < StandardCost THEN StandardCost * 1.1 
+                    ELSE ListPrice 
+                END
+WHERE ProductID IS NOT NULL;
 
 -- 4. Créer une table nettoyée avec les colonnes pertinentes
 SELECT 

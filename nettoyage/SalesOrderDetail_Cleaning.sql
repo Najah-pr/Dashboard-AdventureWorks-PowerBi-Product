@@ -1,3 +1,6 @@
+-- =============================================
+-- Description: Script de nettoyage des données pour la table Sales.SalesOrderDetail
+-- =============================================
 IF OBJECT_ID('Sales.SalesOrderDetail_Clean', 'U') IS NOT NULL
     DROP TABLE Sales.SalesOrderDetail_Clean;
 
